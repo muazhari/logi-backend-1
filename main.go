@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/muazhari/logi-backend-1/src/outers/routes"
 	"log"
-	"logi-backend-1/src/outers/routes"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,11 +11,11 @@ import (
 )
 
 func main() {
-	log.Println("Starting app...")
+	log.Println("Starting app.")
 
-	err := godotenv.Load()
+	errEnvLoad := godotenv.Load()
 
-	if err != nil {
+	if errEnvLoad != nil {
 		log.Fatal("Error loading .env file")
 	}
 
@@ -23,8 +23,12 @@ func main() {
 
 	routes.NewApiV1Route(app)
 
+	appHost := os.Getenv("APP_HOST")
 	appPort := os.Getenv("APP_PORT")
-	app.Listen(fmt.Sprintf(":%s", appPort))
+	errAppListen := app.Listen(fmt.Sprintf("%s:%s", appHost, appPort))
+	if errAppListen != nil {
+		log.Fatal("Error starting app.")
+	}
 
-	log.Println("Stopping app...")
+	log.Println("Stopping app.")
 }

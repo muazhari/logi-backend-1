@@ -1,16 +1,36 @@
 package managements
 
 import (
-	"logi-backend-1/src/outers/repositories"
+	"github.com/muazhari/logi-backend-1/src/outers/repositories/databases"
 )
 
 type LogManagement struct {
-	logRepository *repositories.LogRepository
+	LogRepository *databases.LogDatabaseRepository
 }
 
-func NewLogManagement(logRepository *repositories.LogRepository) *LogManagement {
+func NewLogManagement(logRepository *databases.LogDatabaseRepository) *LogManagement {
 	logManagement := &LogManagement{
-		logRepository: logRepository,
+		LogRepository: logRepository,
 	}
 	return logManagement
+}
+
+func (logManagement *LogManagement) CreateOne() error {
+	return nil
+}
+
+func (logManagement *LogManagement) ReadOneById() error {
+	return nil
+}
+
+func (logManagement *LogManagement) ReadMany() error {
+	return nil
+}
+
+func (logManagement *LogManagement) UpdateOneById() error {
+	return nil
+}
+
+func (logManagement *LogManagement) DeleteOneById() error {
+	return nil
 }

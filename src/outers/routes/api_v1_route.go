@@ -1,36 +1,47 @@
 package routes
 
 import (
-	"logi-backend-1/src/inners/use_cases/managements"
-	"logi-backend-1/src/outers/configurations"
-	"logi-backend-1/src/outers/controllers"
-	"logi-backend-1/src/outers/datastores"
-	"logi-backend-1/src/outers/repositories"
+	"github.com/muazhari/logi-backend-1/src/inners/use_cases/managements"
+	"github.com/muazhari/logi-backend-1/src/outers/configurations"
+	"github.com/muazhari/logi-backend-1/src/outers/controllers/rests"
+	databaseDatastores "github.com/muazhari/logi-backend-1/src/outers/datastores/databases"
+	indexerDatastores "github.com/muazhari/logi-backend-1/src/outers/datastores/indexers"
+	"github.com/muazhari/logi-backend-1/src/outers/datastores/message_brokers"
+	databaseRepositories "github.com/muazhari/logi-backend-1/src/outers/repositories/databases"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 type ApiV1Route struct {
-	app *fiber.App
+	App *fiber.App
 }
 
 func NewApiV1Route(app *fiber.App) *ApiV1Route {
 
-	oneDatastoreConfiguration := configurations.NewOneDatastoreConfiguration()
+	oneDatabaseConfiguration := configurations.NewOneDatabaseConfiguration()
+	oneIndexerConfiguration := configurations.NewOneIndexerConfiguration()
+	oneMessageBrokerConfiguration := configurations.NewOneMessageBrokerConfiguration()
 
-	oneDatastore := datastores.NewOneDatastore(oneDatastoreConfiguration)
+	oneDatabaseDatastore := databaseDatastores.NewOneDatabaseDatastore(oneDatabaseConfiguration)
+	oneDatabaseDatastore.Connect()
 
-	logRepository := repositories.NewLogRepository(oneDatastore)
+	oneIndexerDatastore := indexerDatastores.NewOneIndexerDatastore(oneIndexerConfiguration)
+	oneIndexerDatastore.Connect()
 
-	logManagement := managements.NewLogManagement(logRepository)
+	oneMessageBrokerDatastore := message_brokers.NewOneMessageBrokerDatastore(oneMessageBrokerConfiguration)
+	oneMessageBrokerDatastore.Connect()
+
+	logPersistenceRepository := databaseRepositories.NewLogDatabaseRepository(oneDatabaseDatastore)
+
+	logManagement := managements.NewLogManagement(logPersistenceRepository)
 
 	apiV1Router := app.Group("/api/v1")
 
-	logController := controllers.NewLogController(apiV1Router, logManagement)
+	logController := rests.NewLogController(apiV1Router, logManagement)
 	logController.RegisterRoutes()
 
 	apiV1Route := &ApiV1Route{
-		app: app,
+		App: app,
 	}
 
 	return apiV1Route
