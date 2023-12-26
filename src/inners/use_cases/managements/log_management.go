@@ -5,12 +5,12 @@ import (
 )
 
 type LogManagement struct {
-	LogRepository *databases.LogDatabaseRepository
+	LogDatabaseRepository *databases.LogDatabaseRepository
 }
 
 func NewLogManagement(logRepository *databases.LogDatabaseRepository) *LogManagement {
 	logManagement := &LogManagement{
-		LogRepository: logRepository,
+		LogDatabaseRepository: logRepository,
 	}
 	return logManagement
 }
