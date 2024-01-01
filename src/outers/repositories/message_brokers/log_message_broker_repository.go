@@ -8,9 +8,9 @@ type LogMessageBrokerRepository struct {
 	OneMessageBrokerDatastore *messageBrokerDatastores.OneMessageBrokerDatastore
 }
 
-func NewLogIndexerRepository(oneMessageBrokerDatastore *messageBrokerDatastores.OneMessageBrokerDatastore) *LogMessageBrokerRepository {
-	logIndexerRepository := &LogMessageBrokerRepository{
+func NewLogMessageBrokerRepository(oneMessageBrokerDatastore *messageBrokerDatastores.OneMessageBrokerDatastore) *LogMessageBrokerRepository {
+	logMessageBrokerRepository := &LogMessageBrokerRepository{
 		OneMessageBrokerDatastore: oneMessageBrokerDatastore,
 	}
-	return logIndexerRepository
+	return logMessageBrokerRepository
 }

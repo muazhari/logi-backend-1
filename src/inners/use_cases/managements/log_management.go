@@ -1,16 +1,26 @@
 package managements
 
 import (
-	"github.com/muazhari/logi-backend-1/src/outers/repositories/databases"
+	databaseRepository "github.com/muazhari/logi-backend-1/src/outers/repositories/databases"
+	indexerRepository "github.com/muazhari/logi-backend-1/src/outers/repositories/indexers"
+	messageBrokerRepository "github.com/muazhari/logi-backend-1/src/outers/repositories/message_brokers"
 )
 
 type LogManagement struct {
-	LogDatabaseRepository *databases.LogDatabaseRepository
+	LogDatabaseRepository      *databaseRepository.LogDatabaseRepository
+	LogIndexerRepository       *indexerRepository.LogIndexerRepository
+	LogMessageBrokerRepository *messageBrokerRepository.LogMessageBrokerRepository
 }
 
-func NewLogManagement(logRepository *databases.LogDatabaseRepository) *LogManagement {
+func NewLogManagement(
+	logRepository *databaseRepository.LogDatabaseRepository,
+	logIndexerRepository *indexerRepository.LogIndexerRepository,
+	logMessageBrokerRepository *messageBrokerRepository.LogMessageBrokerRepository,
+) *LogManagement {
 	logManagement := &LogManagement{
-		LogDatabaseRepository: logRepository,
+		LogDatabaseRepository:      logRepository,
+		LogIndexerRepository:       logIndexerRepository,
+		LogMessageBrokerRepository: logMessageBrokerRepository,
 	}
 	return logManagement
 }

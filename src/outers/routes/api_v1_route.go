@@ -8,6 +8,8 @@ import (
 	indexerDatastores "github.com/muazhari/logi-backend-1/src/outers/datastores/indexers"
 	"github.com/muazhari/logi-backend-1/src/outers/datastores/message_brokers"
 	databaseRepositories "github.com/muazhari/logi-backend-1/src/outers/repositories/databases"
+	indexerRepositories "github.com/muazhari/logi-backend-1/src/outers/repositories/indexers"
+	messageBrokerRepositories "github.com/muazhari/logi-backend-1/src/outers/repositories/message_brokers"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -31,9 +33,11 @@ func NewApiV1Route(app *fiber.App) *ApiV1Route {
 	oneMessageBrokerDatastore := message_brokers.NewOneMessageBrokerDatastore(oneMessageBrokerConfiguration)
 	oneMessageBrokerDatastore.Connect()
 
-	logPersistenceRepository := databaseRepositories.NewLogDatabaseRepository(oneDatabaseDatastore)
+	logDatabaseRepository := databaseRepositories.NewLogDatabaseRepository(oneDatabaseDatastore)
+	logIndexerRepository := indexerRepositories.NewLogIndexerRepository(oneIndexerDatastore)
+	logMessageBrokerRepository := messageBrokerRepositories.NewLogMessageBrokerRepository(oneMessageBrokerDatastore)
 
-	logManagement := managements.NewLogManagement(logPersistenceRepository)
+	logManagement := managements.NewLogManagement(logDatabaseRepository, logIndexerRepository, logMessageBrokerRepository)
 
 	apiV1Router := app.Group("/api/v1")
 
