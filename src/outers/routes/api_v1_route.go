@@ -6,10 +6,11 @@ import (
 	"github.com/muazhari/logi-backend-1/src/outers/controllers/rests"
 	databaseDatastores "github.com/muazhari/logi-backend-1/src/outers/datastores/databases"
 	indexerDatastores "github.com/muazhari/logi-backend-1/src/outers/datastores/indexers"
-	"github.com/muazhari/logi-backend-1/src/outers/datastores/message_brokers"
+	messageBrokerDatastores "github.com/muazhari/logi-backend-1/src/outers/datastores/message_brokers"
 	databaseRepositories "github.com/muazhari/logi-backend-1/src/outers/repositories/databases"
 	indexerRepositories "github.com/muazhari/logi-backend-1/src/outers/repositories/indexers"
 	messageBrokerRepositories "github.com/muazhari/logi-backend-1/src/outers/repositories/message_brokers"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -30,7 +31,7 @@ func NewApiV1Route(app *fiber.App) *ApiV1Route {
 	oneIndexerDatastore := indexerDatastores.NewOneIndexerDatastore(oneIndexerConfiguration)
 	oneIndexerDatastore.Connect()
 
-	oneMessageBrokerDatastore := message_brokers.NewOneMessageBrokerDatastore(oneMessageBrokerConfiguration)
+	oneMessageBrokerDatastore := messageBrokerDatastores.NewOneMessageBrokerDatastore(oneMessageBrokerConfiguration)
 	oneMessageBrokerDatastore.Connect()
 
 	logDatabaseRepository := databaseRepositories.NewLogDatabaseRepository(oneDatabaseDatastore)
@@ -38,6 +39,10 @@ func NewApiV1Route(app *fiber.App) *ApiV1Route {
 	logMessageBrokerRepository := messageBrokerRepositories.NewLogMessageBrokerRepository(oneMessageBrokerDatastore)
 
 	logManagement := managements.NewLogManagement(logDatabaseRepository, logIndexerRepository, logMessageBrokerRepository)
+	consumeMessageErr := logManagement.ConsumeMessage()
+	if consumeMessageErr != nil {
+		log.Fatal("Failed to consume message: ", consumeMessageErr)
+	}
 
 	apiV1Router := app.Group("/api/v1")
 

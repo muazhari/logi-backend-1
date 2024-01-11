@@ -35,11 +35,6 @@ func (oneMessageBrokerDatastore *OneMessageBrokerDatastore) Connect() {
 	if errConnect != nil {
 		log.Fatal(errConnect)
 	}
-	defer func() {
-		if err := client.Close(); err != nil {
-			log.Fatal(err)
-		}
-	}()
 
 	oneMessageBrokerDatastore.Client = client
 }

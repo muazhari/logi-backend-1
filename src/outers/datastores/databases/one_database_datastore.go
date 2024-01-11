@@ -34,11 +34,5 @@ func (oneDatastore *OneDatabaseDatastore) Connect() {
 		log.Fatal(err)
 	}
 
-	defer func() {
-		if err = client.Disconnect(ctx); err != nil {
-			log.Fatal(err)
-		}
-	}()
-
 	oneDatastore.Client = client
 }
