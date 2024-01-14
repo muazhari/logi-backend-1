@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/muazhari/logi-backend-1/src/inners/use_cases/managements"
 	"github.com/muazhari/logi-backend-1/src/outers/configurations"
 	"github.com/muazhari/logi-backend-1/src/outers/controllers/rests"
@@ -10,9 +12,6 @@ import (
 	databaseRepositories "github.com/muazhari/logi-backend-1/src/outers/repositories/databases"
 	indexerRepositories "github.com/muazhari/logi-backend-1/src/outers/repositories/indexers"
 	messageBrokerRepositories "github.com/muazhari/logi-backend-1/src/outers/repositories/message_brokers"
-	"log"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 type ApiV1Route struct {
@@ -20,28 +19,36 @@ type ApiV1Route struct {
 }
 
 func NewApiV1Route(app *fiber.App) *ApiV1Route {
-
 	oneDatabaseConfiguration := configurations.NewOneDatabaseConfiguration()
 	oneIndexerConfiguration := configurations.NewOneIndexerConfiguration()
 	oneMessageBrokerConfiguration := configurations.NewOneMessageBrokerConfiguration()
 
 	oneDatabaseDatastore := databaseDatastores.NewOneDatabaseDatastore(oneDatabaseConfiguration)
-	oneDatabaseDatastore.Connect()
+	oneDatabaseDatastoreConnectErr := oneDatabaseDatastore.Connect()
+	if oneDatabaseDatastoreConnectErr != nil {
+		log.Debugf("oneDatabaseDatastoreConnectErr: %+v", oneDatabaseDatastoreConnectErr)
+	}
 
 	oneIndexerDatastore := indexerDatastores.NewOneIndexerDatastore(oneIndexerConfiguration)
-	oneIndexerDatastore.Connect()
+	oneIndexerDatastoreConnectErr := oneIndexerDatastore.Connect()
+	if oneIndexerDatastoreConnectErr != nil {
+		log.Debugf("oneIndexerDatastoreConnectErr: %+v", oneIndexerDatastoreConnectErr)
+	}
 
 	oneMessageBrokerDatastore := messageBrokerDatastores.NewOneMessageBrokerDatastore(oneMessageBrokerConfiguration)
-	oneMessageBrokerDatastore.Connect()
+	oneMessageBrokerDatastoreConnectErr := oneMessageBrokerDatastore.Connect()
+	if oneMessageBrokerDatastoreConnectErr != nil {
+		log.Debugf("oneMessageBrokerDatastoreConnectErr: %+v", oneMessageBrokerDatastoreConnectErr)
+	}
 
 	logDatabaseRepository := databaseRepositories.NewLogDatabaseRepository(oneDatabaseDatastore)
 	logIndexerRepository := indexerRepositories.NewLogIndexerRepository(oneIndexerDatastore)
 	logMessageBrokerRepository := messageBrokerRepositories.NewLogMessageBrokerRepository(oneMessageBrokerDatastore)
 
 	logManagement := managements.NewLogManagement(logDatabaseRepository, logIndexerRepository, logMessageBrokerRepository)
-	consumeMessageErr := logManagement.ConsumeMessage()
-	if consumeMessageErr != nil {
-		log.Fatal("Failed to consume message: ", consumeMessageErr)
+	logManagementConsumeMessageErr := logManagement.ConsumeMessage()
+	if logManagementConsumeMessageErr != nil {
+		log.Debugf("logManagementConsumeMessageErr: %+v", logManagementConsumeMessageErr)
 	}
 
 	apiV1Router := app.Group("/api/v1")

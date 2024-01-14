@@ -3,7 +3,6 @@ package message_brokers
 import (
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/muazhari/logi-backend-1/src/outers/configurations"
-	"log"
 )
 
 type OneIndexerDatastore struct {
@@ -18,7 +17,7 @@ func NewOneIndexerDatastore(configuration *configurations.OneIndexerConfiguratio
 	}
 }
 
-func (oneIndexerDatastore *OneIndexerDatastore) Connect() {
+func (oneIndexerDatastore *OneIndexerDatastore) Connect() (err error) {
 	config := elasticsearch.Config{
 		Addresses: []string{
 			oneIndexerDatastore.Configuration.ExternalUrl,
@@ -28,8 +27,10 @@ func (oneIndexerDatastore *OneIndexerDatastore) Connect() {
 	}
 	client, errConnect := elasticsearch.NewClient(config)
 	if errConnect != nil {
-		log.Fatal(errConnect)
+		err = errConnect
 	}
 
 	oneIndexerDatastore.Client = client
+
+	return err
 }

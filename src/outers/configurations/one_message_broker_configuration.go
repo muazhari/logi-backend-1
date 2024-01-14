@@ -1,6 +1,7 @@
 package configurations
 
 import (
+	"github.com/segmentio/kafka-go"
 	"log"
 	"os"
 	"strconv"
@@ -12,6 +13,8 @@ type OneMessageBrokerConfiguration struct {
 	ExternalUrl  string
 	Topic        string
 	Partition    int
+	StartOffset  int64
+	GroupID      string
 }
 
 func NewOneMessageBrokerConfiguration() *OneMessageBrokerConfiguration {
@@ -25,6 +28,8 @@ func NewOneMessageBrokerConfiguration() *OneMessageBrokerConfiguration {
 		Topic:        os.Getenv("KAFKA_1_TOPIC"),
 		Partition:    partition,
 		ExternalUrl:  os.Getenv("KAFKA_1_EXTERNAL_URL"),
+		StartOffset:  kafka.LastOffset,
+		GroupID:      os.Getenv("KAFKA_1_GROUP_ID"),
 	}
 	return oneMessageBrokerConfiguration
 }

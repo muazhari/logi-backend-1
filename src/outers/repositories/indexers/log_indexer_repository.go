@@ -2,10 +2,9 @@ package indexers
 
 import (
 	"bytes"
+	"encoding/json"
 	"github.com/muazhari/logi-backend-1/src/inners/models/entities"
 	indexerDatastores "github.com/muazhari/logi-backend-1/src/outers/datastores/indexers"
-	"go.mongodb.org/mongo-driver/bson"
-	"log"
 )
 
 type LogIndexerRepository struct {
@@ -19,16 +18,17 @@ func NewLogIndexerRepository(oneIndexerDatastore *indexerDatastores.OneIndexerDa
 	return logIndexerRepository
 }
 
-func (logIndexerRepository *LogIndexerRepository) CreateOne(entity *entities.Log) error {
-	marshallOutput, marshallErr := bson.Marshal(entity)
+func (logIndexerRepository *LogIndexerRepository) CreateOne(entity *entities.Log) (err error) {
+	marshallOutput, marshallErr := json.Marshal(entity)
 	if marshallErr != nil {
-		log.Fatal("Failed to marshall: ", marshallErr)
+		err = marshallErr
 	}
 
 	body := bytes.NewReader(marshallOutput)
-	_, err := logIndexerRepository.OneIndexerDatastore.Client.Index("logs", body)
-	if err != nil {
-		log.Fatal("Failed to index: ", err)
+	_, indexErr := logIndexerRepository.OneIndexerDatastore.Client.Index("log", body)
+	if indexErr != nil {
+		err = indexErr
 	}
-	return nil
+
+	return err
 }

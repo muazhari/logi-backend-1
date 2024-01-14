@@ -1,9 +1,11 @@
 package indexers
 
 import (
+	"context"
+	log "github.com/gofiber/fiber/v2/log"
 	messageBrokerDatastores "github.com/muazhari/logi-backend-1/src/outers/datastores/message_brokers"
 	"github.com/segmentio/kafka-go"
-	"log"
+	"time"
 )
 
 type LogMessageBrokerRepository struct {
@@ -17,21 +19,29 @@ func NewLogMessageBrokerRepository(oneMessageBrokerDatastore *messageBrokerDatas
 	return logMessageBrokerRepository
 }
 
-func (logMessageBrokerRepository *LogMessageBrokerRepository) ConsumeMessage(callback func(message *kafka.Message) error) error {
+func (logMessageBrokerRepository *LogMessageBrokerRepository) ConsumeMessage(callback func(message *kafka.Message) error) (err error) {
 	go func() {
 		for {
-			message, readMessageErr := logMessageBrokerRepository.OneMessageBrokerDatastore.Client.ReadMessage(10e3)
-			if readMessageErr != nil {
-				log.Fatal("Failed to read message: ", readMessageErr)
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			message, readMessageErr := logMessageBrokerRepository.OneMessageBrokerDatastore.Reader.ReadMessage(ctx)
+			defer cancel()
+
+			if message.Value == nil {
+				continue
 			}
-			log.Default().Printf("Consumed message: %+v", message)
+
+			if readMessageErr != nil {
+				log.Debugf("readMessageErr: %+v", readMessageErr)
+			}
+			log.Debugf("message: %+v", message)
+			log.Debugf("key: %+v & value: %+v", string(message.Key), string(message.Value))
 
 			callbackErr := callback(&message)
 			if callbackErr != nil {
-				log.Fatal("Failed to execute callback: ", callbackErr)
+				log.Debugf("callbackErr: %+v", callbackErr)
 			}
 		}
 	}()
 
-	return nil
+	return err
 }

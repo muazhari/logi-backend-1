@@ -1,14 +1,14 @@
 package entities
 
 type Log struct {
-	id      string
-	content string
+	Id      string `json:"id"`
+	Content string `json:"content"`
 }
 
 func NewLog(id string, content string) *Log {
 	log := &Log{
-		id:      id,
-		content: content,
+		Id:      id,
+		Content: content,
 	}
 	return log
 }

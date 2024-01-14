@@ -2,7 +2,6 @@ package databases
 
 import (
 	"github.com/muazhari/logi-backend-1/src/outers/configurations"
-	"log"
 	"time"
 
 	"context"
@@ -24,15 +23,17 @@ func NewOneDatabaseDatastore(oneDatastoreConfiguration *configurations.OneDataba
 	return oneDatabaseDatastore
 }
 
-func (oneDatastore *OneDatabaseDatastore) Connect() {
+func (oneDatastore *OneDatabaseDatastore) Connect() (err error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(oneDatastore.Configuration.Url))
-	if err != nil {
-		log.Fatal(err)
+	client, connectErr := mongo.Connect(ctx, options.Client().ApplyURI(oneDatastore.Configuration.Url))
+	if connectErr != nil {
+		err = connectErr
 	}
 
 	oneDatastore.Client = client
+
+	return err
 }

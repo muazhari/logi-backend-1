@@ -14,9 +14,8 @@ func main() {
 	log.Println("Starting app.")
 
 	errEnvLoad := godotenv.Load()
-
 	if errEnvLoad != nil {
-		log.Fatal("Error loading .env file")
+		log.Fatalf("Load .env file error: %+v", errEnvLoad)
 	}
 
 	app := fiber.New()
@@ -27,7 +26,7 @@ func main() {
 	appPort := os.Getenv("APP_PORT")
 	errAppListen := app.Listen(fmt.Sprintf("%s:%s", appHost, appPort))
 	if errAppListen != nil {
-		log.Fatal("Error starting app.")
+		log.Fatalf("Starting app error: %+v", errAppListen)
 	}
 
 	log.Println("Stopping app.")
