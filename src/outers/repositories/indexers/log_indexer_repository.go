@@ -25,7 +25,8 @@ func (logIndexerRepository *LogIndexerRepository) CreateOne(entity *entities.Log
 	}
 
 	body := bytes.NewReader(marshallOutput)
-	_, indexErr := logIndexerRepository.OneIndexerDatastore.Client.Index("log", body)
+	index := logIndexerRepository.OneIndexerDatastore.Configuration.Index
+	_, indexErr := logIndexerRepository.OneIndexerDatastore.Client.Index(index, body)
 	if indexErr != nil {
 		err = indexErr
 	}

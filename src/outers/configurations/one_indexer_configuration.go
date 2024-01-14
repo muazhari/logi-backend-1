@@ -10,6 +10,7 @@ type OneIndexerConfiguration struct {
 	InternalUrl  string
 	Username     string
 	Password     string
+	Index        string
 }
 
 func NewOneIndexerConfiguration() *OneIndexerConfiguration {
@@ -21,6 +22,7 @@ func NewOneIndexerConfiguration() *OneIndexerConfiguration {
 		InternalUrl:  os.Getenv("ELASTICSEARCH_1_INTERNAL_URL"),
 		Username:     os.Getenv("ELASTICSEARCH_1_USERNAME"),
 		Password:     os.Getenv("ELASTICSEARCH_1_PASSWORD"),
+		Index:        os.Getenv("ELASTICSEARCH_1_INDEX"),
 	}
 	return oneIndexerConfiguration
 }
