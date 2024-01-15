@@ -3,27 +3,31 @@ package managements
 import (
 	"github.com/google/uuid"
 	"github.com/muazhari/logi-backend-1/src/inners/models/entities"
-	databaseRepository "github.com/muazhari/logi-backend-1/src/outers/repositories/databases"
-	indexerRepository "github.com/muazhari/logi-backend-1/src/outers/repositories/indexers"
-	messageBrokerRepository "github.com/muazhari/logi-backend-1/src/outers/repositories/message_brokers"
+	databaseRepositories "github.com/muazhari/logi-backend-1/src/outers/repositories/databases"
+	indexerRepositories "github.com/muazhari/logi-backend-1/src/outers/repositories/indexers"
+	messageBrokerRepositories "github.com/muazhari/logi-backend-1/src/outers/repositories/message_brokers"
 	"github.com/segmentio/kafka-go"
+	"time"
 )
 
 type LogManagement struct {
-	LogDatabaseRepository      *databaseRepository.LogDatabaseRepository
-	LogIndexerRepository       *indexerRepository.LogIndexerRepository
-	LogMessageBrokerRepository *messageBrokerRepository.LogMessageBrokerRepository
+	LogDatabaseRepository      *databaseRepositories.LogDatabaseRepository
+	LogIndexerRepository       *indexerRepositories.LogIndexerRepository
+	LogMessageBrokerRepository *messageBrokerRepositories.LogMessageBrokerRepository
+	SettingManagement          *SettingManagement
 }
 
 func NewLogManagement(
-	logRepository *databaseRepository.LogDatabaseRepository,
-	logIndexerRepository *indexerRepository.LogIndexerRepository,
-	logMessageBrokerRepository *messageBrokerRepository.LogMessageBrokerRepository,
+	logRepository *databaseRepositories.LogDatabaseRepository,
+	logIndexerRepository *indexerRepositories.LogIndexerRepository,
+	logMessageBrokerRepository *messageBrokerRepositories.LogMessageBrokerRepository,
+	settingManagement *SettingManagement,
 ) *LogManagement {
 	logManagement := &LogManagement{
 		LogDatabaseRepository:      logRepository,
 		LogIndexerRepository:       logIndexerRepository,
 		LogMessageBrokerRepository: logMessageBrokerRepository,
+		SettingManagement:          settingManagement,
 	}
 	return logManagement
 }
@@ -35,7 +39,17 @@ func (logManagement *LogManagement) ConsumeMessage() (err error) {
 			entity := entities.NewLog(
 				uuid.New().String(),
 				string(message.Value),
+				time.Now().Local(),
 			)
+
+			readSetting, readSettingErr := logManagement.SettingManagement.ReadOne()
+			if readSettingErr != nil {
+				err = readSettingErr
+			}
+			deleteOlderThanRetainedTimeErr := logManagement.LogIndexerRepository.DeleteManyOlderThanRetainedTime(readSetting.IndexRetainTime)
+			if deleteOlderThanRetainedTimeErr != nil {
+				err = deleteOlderThanRetainedTimeErr
+			}
 
 			createOneToIndexerErr := logManagement.CreateOneToIndexer(entity)
 			if createOneToIndexerErr != nil {

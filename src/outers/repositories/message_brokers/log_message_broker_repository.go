@@ -22,9 +22,9 @@ func NewLogMessageBrokerRepository(oneMessageBrokerDatastore *messageBrokerDatas
 func (logMessageBrokerRepository *LogMessageBrokerRepository) ConsumeMessage(callback func(message *kafka.Message) error) (err error) {
 	go func() {
 		for {
-			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-			message, readMessageErr := logMessageBrokerRepository.OneMessageBrokerDatastore.Reader.ReadMessage(ctx)
-			defer cancel()
+			readMessageCtx, readMessageCtxCancel := context.WithTimeout(context.Background(), 1*time.Second)
+			message, readMessageErr := logMessageBrokerRepository.OneMessageBrokerDatastore.Reader.ReadMessage(readMessageCtx)
+			defer readMessageCtxCancel()
 
 			if message.Value == nil {
 				continue

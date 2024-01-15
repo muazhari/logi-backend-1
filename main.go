@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/muazhari/logi-backend-1/src/outers/routes"
-	"log"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,11 +11,11 @@ import (
 )
 
 func main() {
-	log.Println("Starting app.")
+	log.Debugf("Starting app.")
 
 	errEnvLoad := godotenv.Load()
 	if errEnvLoad != nil {
-		log.Fatalf("Load .env file error: %+v", errEnvLoad)
+		log.Debugf("Error loading .env file: %+v", errEnvLoad)
 	}
 
 	app := fiber.New()
@@ -26,8 +26,8 @@ func main() {
 	appPort := os.Getenv("APP_PORT")
 	errAppListen := app.Listen(fmt.Sprintf("%s:%s", appHost, appPort))
 	if errAppListen != nil {
-		log.Fatalf("Starting app error: %+v", errAppListen)
+		log.Debugf("Error starting app: %+v", errAppListen)
 	}
 
-	log.Println("Stopping app.")
+	log.Debugf("App started.")
 }

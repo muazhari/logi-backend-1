@@ -12,6 +12,7 @@ import (
 	databaseRepositories "github.com/muazhari/logi-backend-1/src/outers/repositories/databases"
 	indexerRepositories "github.com/muazhari/logi-backend-1/src/outers/repositories/indexers"
 	messageBrokerRepositories "github.com/muazhari/logi-backend-1/src/outers/repositories/message_brokers"
+	"github.com/muazhari/logi-backend-1/src/outers/seeders"
 )
 
 type ApiV1Route struct {
@@ -45,7 +46,29 @@ func NewApiV1Route(app *fiber.App) *ApiV1Route {
 	logIndexerRepository := indexerRepositories.NewLogIndexerRepository(oneIndexerDatastore)
 	logMessageBrokerRepository := messageBrokerRepositories.NewLogMessageBrokerRepository(oneMessageBrokerDatastore)
 
-	logManagement := managements.NewLogManagement(logDatabaseRepository, logIndexerRepository, logMessageBrokerRepository)
+	settingDatabaseRepository := databaseRepositories.NewSettingDatabaseRepository(oneDatabaseDatastore)
+
+	oneSeeder := seeders.NewOneSeeder(
+		logDatabaseRepository,
+		logIndexerRepository,
+		logMessageBrokerRepository,
+		settingDatabaseRepository,
+	)
+
+	oneSeederErr := oneSeeder.Seed()
+	if oneSeederErr != nil {
+		log.Debugf("oneSeederErr: %+v", oneSeederErr)
+	}
+
+	settingManagement := managements.NewSettingManagement(settingDatabaseRepository)
+
+	logManagement := managements.NewLogManagement(
+		logDatabaseRepository,
+		logIndexerRepository,
+		logMessageBrokerRepository,
+		settingManagement,
+	)
+
 	logManagementConsumeMessageErr := logManagement.ConsumeMessage()
 	if logManagementConsumeMessageErr != nil {
 		log.Debugf("logManagementConsumeMessageErr: %+v", logManagementConsumeMessageErr)
