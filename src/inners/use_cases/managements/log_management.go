@@ -1,6 +1,7 @@
 package managements
 
 import (
+	"errors"
 	"github.com/google/uuid"
 	"github.com/muazhari/logi-backend-1/src/inners/models/entities"
 	databaseRepositories "github.com/muazhari/logi-backend-1/src/outers/repositories/databases"
@@ -43,6 +44,9 @@ func (logManagement *LogManagement) ConsumeMessage() (err error) {
 			)
 
 			readSetting, readSettingErr := logManagement.SettingManagement.ReadOne()
+			if readSetting == nil {
+				err = errors.New("readSetting is nil")
+			}
 			if readSettingErr != nil {
 				err = readSettingErr
 			}
