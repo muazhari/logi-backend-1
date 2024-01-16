@@ -34,13 +34,14 @@ func NewLogManagement(
 }
 
 func (logManagement *LogManagement) ConsumeMessage() (err error) {
-
 	consumeMessageErr := logManagement.LogMessageBrokerRepository.ConsumeMessage(
 		func(message *kafka.Message) (err error) {
+			zone, _ := time.Now().Zone()
 			entity := entities.NewLog(
 				uuid.New().String(),
 				string(message.Value),
-				time.Now().Local(),
+				time.Now().Unix(),
+				zone,
 			)
 
 			readSetting, readSettingErr := logManagement.SettingManagement.ReadOne()
@@ -50,6 +51,7 @@ func (logManagement *LogManagement) ConsumeMessage() (err error) {
 			if readSettingErr != nil {
 				err = readSettingErr
 			}
+
 			deleteOlderThanRetainedTimeErr := logManagement.LogIndexerRepository.DeleteManyOlderThanRetainedTime(readSetting.IndexRetainTime)
 			if deleteOlderThanRetainedTimeErr != nil {
 				err = deleteOlderThanRetainedTimeErr
